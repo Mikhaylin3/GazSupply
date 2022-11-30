@@ -1,0 +1,220 @@
+﻿@page "/cabinet"
+@using Gaz.Data;
+@inject Mongich f;
+@inject NavigationManager nav
+<h3>PersonalArea</h3>
+<p><input @bind-value="Login_" /></p>
+<p><input @bind-value="Password_" /></p>
+<p><input @bind-value="Email_" /></p>
+<p><input @bind-value="Phone_" /></p>
+<p><input @bind-value="Name_" /></p>
+@if(member.GetType().Name == "Projector")
+{
+    <p><input @bind-value=INN_/></p>
+    <p><input @bind-value=Adress_ /></p>
+    <p><input @bind-value=OGNP_/></p>
+    <p><input @bind-value=KPP_ /></p>
+    <p><input @bind-value=Director_ /></p>
+    <p><input @bind-value=Engineer_ /></p>
+    <p><button @onclick="Gol"/></p>
+}
+@if (member.GetType().Name == "Developer")
+{
+    <p><input @bind-value=Info_ /></p>
+}
+@if (member.GetType().Name == "Designer")
+{
+    <p><input @bind-value=INN /></p>
+    <p> <input @bind-value=Adress /></p>
+    <p> <input @bind-value=OGNP /></p>
+    <p> <input @bind-value=KPP /></p>
+    <p> <input @bind-value=Supervisor_ /></p>
+}
+<p>
+    <button class="btn btn-primary" @onclick="Edit">Edit</button>
+    <button class="btn btn-primary" @onclick="Sign">Sign Out</button>
+</p>
+            @if (Check_ == true)
+            {
+    <p> <h2>Changes are successful</h2></p>
+            }
+
+            @if (Check_1 == true)
+            {
+    <p> <h2>@Error_</h2></p>
+            }
+@code {
+    //User
+    private IUserData? member;
+    private string? Login_;
+    private string? Password_;
+    private string? Email_;
+    private string? Phone_;
+    private string? Name_;
+    //Designer
+    public string? OGNP;
+    public string? INN;
+    public string? KPP;
+    public string? Adress;
+    public string? Supervisor_;
+
+
+    //Developer
+    private string? Info_;
+
+    private string? HeadOfTheExecutiveDepartmentOfTheRTCommittee_;
+
+    //Projector
+    public string? NameOfTheProjectOrganization_;
+    public string? OGNP_;
+    public string? INN_;
+    public string? KPP_;
+    public string? Adress_;
+    public string? Director_;
+    public string? Engineer_;
+
+    private bool? Check_ = false;
+    private bool? Check_1 = false;
+    private string? Error_ = "";
+    private void Gol()
+    {
+        nav.NavigateTo("/loaddoc");
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        member = f.GetUser();
+        Login_ = member.Login;
+        Password_ = member.Password;
+        Email_ = member.Email;
+        Phone_ = member.Phone;
+        Name_ = member.Name;
+        if (member.GetType().Name == "Developer")
+        {
+            Info_ = (member as Developer).Info;
+
+        }
+        else if (member.GetType().Name == "Designer")
+        {
+            OGNP = (member as Designer).OGPN;
+            INN = (member as Designer).INN;
+            KPP = (member as Designer).KPP;
+            Adress = (member as Designer).Adress;
+            Supervisor_ = (member as Designer).Supervisor;
+        }
+        else if (member.GetType().Name == "Projector")
+        {
+            INN_ = (member as Projector).INN;
+            OGNP_ = (member as Projector).OGNP;
+            KPP_ = (member as Projector).KPP;
+            Adress_ = (member as Projector).Adress;
+            Director_ = (member as Projector).Director;
+            Engineer_ = (member as Projector).Engineer;
+        }
+    }
+
+    private void Edit()
+    {
+        switch (member.GetType().Name)
+        {
+            case "Developer":
+                IUserData customer = new Developer()
+                    {
+                        
+                        Login = Login_,
+                        Password = Password_,
+                        Email = Email_,
+                        Phone = Phone_,
+                        Name = Name_,
+                        Info = Info_
+                    };
+                Check_ = true;
+                Mongich.ReplaceByName(customer, member.Login);
+                break;
+
+            case "Designer":
+                IUserData developer = new Designer()
+                    {
+                        Name = Name_,
+                        Login = Login_,
+                        Password = Password_,
+                        Email = Email_,
+                        Phone = Phone_,
+                        OGPN = OGNP,
+                        INN = INN,
+                        KPP = KPP,
+                        Adress = Adress,
+                        Supervisor = Supervisor_,
+                    };
+                Check_ = true;
+                Mongich.ReplaceByName(developer, member.Login);
+                break;
+
+            case "Projector":
+                IUserData designer = new Projector()
+                    {
+                        Name = Name_,
+                        Login = Login_,
+                        Password = Password_,
+                        Email = Email_,
+                        Phone = Phone_,
+                        OGNP = OGNP_,
+                        INN = INN_,
+                        KPP = KPP_,
+                        Adress = Adress_,
+                        Director = Director_,
+                        Engineer = Engineer_,
+                        
+                    };
+                Check_ = true;
+                Mongich.ReplaceByName(designer, member.Login);
+                break;
+        }
+    }
+
+    private void Sign()
+    {
+        nav.NavigateTo("/mainwindow");
+    }
+
+    private void Files()
+    {
+        nav.NavigateTo("/files");
+    }
+
+    //private void AddFiles(InputFileChangeEventArgs e)
+    //{
+    //    if (e.FileCount == 11 && member.GetType().Name == "Developer" || e.FileCount == 9)
+    //    {
+    //        foreach (var items in e.GetMultipleFiles(e.FileCount))
+    //        {
+    //            browserFile.Add(items);
+    //            path = Path.Combine(Environment.ContentRootPath, "wwwroot", "filesDeveloper", items.Name);
+
+    //            using FileStream fs = new(path, FileMode.Create);
+    //            items.OpenReadStream(10000000000000).CopyToAsync(fs);
+    //        }
+    //    }
+
+    //    else if (e.FileCount == 2 && member.GetType().Name == "Designer" || e.FileCount == 3)
+    //    {
+    //        foreach (var items in e.GetMultipleFiles(e.FileCount))
+    //        {
+    //            browserFile.Add(items);
+    //            path = Path.Combine(Environment.ContentRootPath, "wwwroot", "filesDesigner", items.Name);
+
+    //            using FileStream fs = new(path, FileMode.Create);
+    //            items.OpenReadStream(10000000000000).CopyToAsync(fs);
+    //        }
+    //    }
+
+    //    else
+    //    {
+    //        Check_1 = true;
+    //        Error_ = "Invalid number of files";
+    //    }
+    //}
+
+}
+}

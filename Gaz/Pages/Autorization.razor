@@ -1,0 +1,40 @@
+﻿@page "/autorization"
+@using Gaz.Data;
+@inject NavigationManager nav;
+@inject Mongich f; 
+<p><input type="text" @bind-value="Login"/></p>
+<p><input type="password" @bind-value="Password" /></p>
+<p><button type="button" @onclick="Gol">Registration</button> <button type="button" @onclick="SignIn">OK</button></p>
+<p><button type="button" @onclick="Lof"/></p>
+
+@code {
+    private string? Login;
+    private string? Password;
+    bool Error = false;
+
+    private void SignIn()
+    {
+        var users = Mongich.FindAll();
+        foreach (var user in users)
+        {
+            if (Login == user.Login && Password == user.Password)
+            {
+                f.SetUser(user);
+                nav.NavigateTo("/cabinet");
+            }
+            else
+            {
+                Error = true;
+            }
+        }
+    }
+    public void Gol()
+    {
+        nav.NavigateTo("/registration");
+    }
+    public void Lof()
+    {
+        nav.NavigateTo("/loaddoc");
+    }
+
+}

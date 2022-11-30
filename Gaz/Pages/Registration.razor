@@ -1,0 +1,112 @@
+﻿@page "/registration"
+@using Gaz.Data;
+@inject NavigationManager nav;
+@namespace Gaz.Pages
+<p><input type="text" @bind-value="Name"/></p>
+<p><input type="text" @bind-value="Login"/></p>
+<p><input type="password" @bind-value="Password"/></p>
+<p><input type="password" @bind-value="pPassword"/></p>
+<p><input type="text" @bind-value="Email"/></p>
+<p><input type="text" @bind-value="Phone" /></p>
+<p><label>
+        Select a Role:
+        <select @bind="@Role" >
+            <option value="">Select a Role</option>
+            <option value="Developer">Developer</option>
+            <option value="Projector">Projector</option>
+            <option value="Designer">Designer</option>
+        </select>
+    </label>
+</p>
+<p><button type="button" @onclick="Gol">Registration</button></p>
+@code {
+    private string? Name;
+    private string? Login;
+    private string? Password;
+    private string? pPassword;
+    private string? Email;
+    private string? Phone;
+    private string? Role;
+    private bool Rot;
+    private bool ErrorPassword = false;
+    private bool ErrorData = false;
+    private bool ErrorAddLogin = false;
+    public void Gol()
+    {
+        if (Login != null && Password != null && Name != null && Phone != null && Email != null && pPassword != null)
+        {
+            if ("Developer"== Role)
+            {
+                IUserData dev = new Developer()
+                {
+                    Login = Login,
+                    Password = Password,
+                    Name = Name,
+                    Email = Email,
+                    Phone = Phone,
+                };
+                
+                Mongich.AddToDb(dev);
+                nav.NavigateTo("/autorization");
+            }
+            if ("Designer" == Role)
+            {
+                IUserData des = new Designer()
+                {
+                    Login = Login,
+                    Password = Password,
+                    Name = Name,
+                    Email = Email,
+                    Phone = Phone,
+                };
+                Mongich.AddToDb(des);
+                nav.NavigateTo("/autorization");
+            }
+            if ("Projector" == Role)
+            {
+                IUserData des = new Projector()
+                {
+                    Login = Login,
+                    Password = Password,
+                    Name = Name,
+                    Email = Email,
+                    Phone = Phone,
+
+                };
+                Mongich.AddToDb(des);
+                nav.NavigateTo("/autorization");
+
+            }
+        }
+        else
+        {
+            ErrorData = true;
+            return;
+        }
+    }
+    private void CheckError()
+    {
+
+        //var userse = UserService.FindAll();
+        //foreach (var user in userse)
+        //{
+        //    if (Login == user.Login)
+        //    {
+        //    ErrorInputLogin = true;
+        //    }
+        //    else
+        //    {
+        //    ErrorInputLogin = false;
+        //    }
+        //}
+        //if (Password != RepPassword)
+        //{
+        //    ErrorPassword = true;
+        //}
+        //else
+        //{
+        //    ErrorPassword = false;
+
+    //}
+    }
+}

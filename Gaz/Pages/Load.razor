@@ -1,0 +1,148 @@
+﻿page "/loaddoc"
+@inject IJSRuntime js
+@inject Mongich f
+@using Gaz.Data;
+@using BlazorInputFile
+@using MongoDB.Driver;
+@inject Gaz.IInvoiceService.IdownloadService desSer;
+
+<h3>Document Gaz</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">№</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Pdf</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var inv in ldes)
+        {
+        <tr>
+            <th scope="row">1</th>
+            <td>Письмо обращения Путина на имя Президента, Премер-Министра, Министрой РТ</td>
+                <td><BlazorInputFile.InputFile OnChange="@(e=> HandleFileSelected(e, @inv.Id.ToString()))" /></td>
+            <td>
+                @if (inv.Data !=null)
+                {
+                        <button class="btn btn-primary" @onclick="@(e => DownloadPdf(@inv.Id.ToString()))">Download</button>
+                 }
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Задание на проектирование</td>
+            <td>Ot</td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td>
+                Ситуационный план (утвержденный исполкомом)
+            </td>
+            <td>Ot</td>
+            
+        </tr>
+        <tr>
+            <th scope="row">4</th>
+            <td>
+                Технические условия на присоединение к газораспределительной сети (№, дата,срок действий Технических условий)
+            </td>
+            <td>Ot</td>
+        </tr>
+        <tr>
+            <th scope="row">5</th>
+            <td>
+                Технический паспорт (план БТИ) объекта СКБ
+            </td>
+            <td>Ot</td>
+        </tr>
+        <tr>
+            <th scope="row">6</th>
+            <td>
+                Технический паспорт (план БТИ) существующей котельной
+            </td>
+            <td>Ot</td>
+        </tr>
+        <tr>
+            <th scope="row">7</th>
+            <td>АКТ обследования объекта </td>
+            <td>Ot</td>
+        </tr>
+        }
+        </tbody>
+</table>
+@code {
+    private IUserData? member;
+    private string? Name_;
+    IUserData designer = new Designer();
+    List<IUserData> ldes = new List<IUserData>();
+    protected override async Task OnInitializedAsync()
+    {
+        member = f.GetUser();
+        Name_ = member.Name;
+        if (member.GetType().Name == "Designer")
+        {
+            t = (member as Designer).Data;
+        }
+
+    }
+    IFileListEntry file;
+
+    private void GetAllInvoices()
+    {
+        ldes = desSer.GetInvoices();
+    }
+    private void AddNew()
+    {
+        designer = new Designer();
+    }
+    private void Save()
+    {
+        desSer.Save(designer);
+        designer = new Designer();
+        GetAllInvoices();
+    }
+    async void HandleFileSelected(IFileListEntry[] files, string id)
+    {
+        var attach = await FileSender(files.FirstOrDefault());
+        desSer.UploadPdf(id, attach);
+    }
+    public async Task<byte[]> FileSender(IFileListEntry file)
+    {
+        using (var ms = new System.IO.MemoryStream())
+        {
+            await file.Data.CopyToAsync(ms);
+            return ms.ToArray();
+        }
+
+    }
+    private void DeletePdf(string id)
+    {
+        var _mongoClient = new MongoClient("mongodb://localhost:27017");
+        var _database = _mongoClient.GetDatabase("Gaz");
+        var _designer = _database.GetCollection<IUserData>("User");
+        var des = _designer.Find(x => x.id == id);
+        if(des.GetType().Name == "Desingner")
+        {
+            data = ()
+        }
+        foreach (var item in _designer)
+        {
+            foreach (var t in des)
+            {
+                t.Data = null;
+                _designer.ReplaceOne(x => x.id == (Object)id, t);
+            }
+        }
+        var fd = _designer.Find(x => x.id == id).FirstOrDefault();
+        desSer.DeletePdf(id);
+        
+    }
+    private void DownloadPdf(string id)
+    {
+        var desin = ldes.FirstOrDefault(x => x.Id == Convert.ToInt32(id));
+        js.InvokeVoidAsync("saveAsFile", "PdfFileName1", desin.Data);
+        GetAllInvoices();
+    }
+}
